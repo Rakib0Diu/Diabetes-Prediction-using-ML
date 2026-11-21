@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiaHealth – Diabetes Prediction System</title>
+
+    <!-- Google Fonts – clean, professional typeface -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Our custom stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         NAVIGATION BAR
+         ===================================================== -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <!-- Logo / Brand name -->
+            <a href="#home" class="nav-brand">
+                <span class="brand-icon">💉</span> DiaHealth
+            </a>
+
+            <!-- Hamburger button for mobile -->
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+            </button>
+
+            <!-- Navigation links -->
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#prediction" class="nav-link">Prediction</a></li>
+                <li><a href="#performance" class="nav-link">Model Performance</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- =====================================================
+         HERO SECTION
+         ===================================================== -->
+    <section class="hero" id="home">
+        <div class="container hero-content">
+            <h1 class="hero-title">Diabetes Prediction System</h1>
+            <p class="hero-subtitle">
+                This project uses machine learning to predict diabetes status
+                from health-related input features. Enter your clinical data
+                below to receive an instant prediction powered by a trained
+                Balanced Logistic Regression model.
+            </p>
+            <a href="#prediction" class="btn btn-primary btn-lg">Check Prediction</a>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         ABOUT SECTION
+         ===================================================== -->
+    <section class="section" id="about">
+        <div class="container">
+            <h2 class="section-title">About the Project</h2>
+            <p class="section-description">
+                <strong>DiaHealth</strong> is a university Machine Learning lab
+                project that applies supervised learning to the DiaHealth
+                dataset in order to predict whether a patient is diabetic or
+                non-diabetic.
+            </p>
+
+            <!-- Info cards -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">📊</div>
+                    <h3>Dataset Size</h3>
+                    <p><strong>5,437</strong> records</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🔢</div>
+                    <h3>Input Features</h3>
+                    <p><strong>14</strong> health-related features</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🎯</div>
+                    <h3>Target Variable</h3>
+                    <p><strong>Diabetic</strong> (Yes / No)</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🤖</div>
+                    <h3>Best Model</h3>
+                    <p><strong>Balanced Logistic Regression</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         PREDICTION FORM SECTION
+         ===================================================== -->
+    <section class="section section-alt" id="prediction">
+        <div class="container">
+            <h2 class="section-title">Diabetes Prediction</h2>
+            <p class="section-description">
+                Fill in all 14 health features below and click
+                <strong>Predict</strong> to get a result.
+            </p>
+
+            <!-- ---- Prediction result (shown after form submission) ---- -->
+            {% if result %}
+            <div class="result-box result-{{ result_class }}">
+                <h3>Predicted Result: {{ result }}</h3>
+                {% if result_class == 'danger' %}
+                <p>The model predicts that the patient <strong>may be diabetic</strong>.
+                   Please consult a healthcare professional for further evaluation.</p>
+                {% else %}
+                <p>The model predicts that the patient is <strong>likely non-diabetic</strong>.
+                   Continue maintaining a healthy lifestyle.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- ---- Error message ---- -->
+            {% if error %}
+            <div class="result-box result-error">
+                <h3>⚠️ Error</h3>
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
+
+            <!-- ---- The prediction form ---- -->
+            <form action="/predict" method="POST" class="prediction-form" id="predictionForm">
+
+                <div class="form-grid">
+
+                    <!-- 1. Age -->
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" placeholder="e.g. 45"
+                               step="any" min="0" required
+                               value="{{ form_data.age if form_data else '' }}">
+                    </div>
+
+                    <!-- 2. Gender -->
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="" disabled
+                                {{ 'selected' if not form_data or not form_data.gender else '' }}>
+                                Select Gender
+                            </option>
+                            <option value="Female"
+                                {{ 'selected' if form_data and form_data.gender == 'Female' else '' }}>
+                                Female
+                            </option>
+                            <option value="Male"
+                                {{ 'selected' if form_data and form_data.gender == 'Male' else '' }}>
+                                Male
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 3. Pulse Rate -->
+                    <div class="form-group">
+                        <label for="pulse_rate">Pulse Rate (bpm)</label>
+                        <input type="number" id="pulse_rate" name="pulse_rate"
+                               placeholder="e.g. 72" step="any" min="0" required
+                               value="{{ form_data.pulse_rate if form_data else '' }}">
+                    </div>
+
+                    <!-- 4. Systolic Blood Pressure -->
+                    <div class="form-group">
+                        <label for="systolic_bp">Systolic BP (mmHg)</label>
+                        <input type="number" id="systolic_bp" name="systolic_bp"
+                               placeholder="e.g. 120" step="any" min="0" required
+                               value="{{ form_data.systolic_bp if form_data else '' }}">
+                    </div>
+
+                    <!-- 5. Diastolic Blood Pressure -->
+                    <div class="form-group">
+                        <label for="diastolic_bp">Diastolic BP (mmHg)</label>
+                        <input type="number" id="diastolic_bp" name="diastolic_bp"
+                               placeholder="e.g. 80" step="any" min="0" required
+                               value="{{ form_data.diastolic_bp if form_data else '' }}">
+                    </div>
+
+                    <!-- 6. Glucose -->
+                    <div class="form-group">
+                        <label for="glucose">Glucose (mmol/L)</label>
+                        <input type="number" id="glucose" name="glucose"
+                               placeholder="e.g. 6.0" step="any" min="0" required
+                               value="{{ form_data.glucose if form_data else '' }}">
+                    </div>
+
+                    <!-- 7. Height -->
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="height"
+                               placeholder="e.g. 170" step="any" min="0" required
+                               value="{{ form_data.height if form_data else '' }}">
+                    </div>
+
+                    <!-- 8. Weight -->
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight"
+                               placeholder="e.g. 75" step="any" min="0" required
+                               value="{{ form_data.weight if form_data else '' }}">
+                    </div>
+
+                    <!-- 9. BMI -->
+                    <div class="form-group">
+                        <label for="bmi">BMI (kg/m²)</label>
+                        <input type="number" id="bmi" name="bmi"
+                               placeholder="e.g. 26.0" step="any" min="0" required
+                               value="{{ form_data.bmi if form_data else '' }}">
+                    </div>
+
+                    <!-- 10. Family Diabetes -->
+                    <div class="form-group">
+                        <label for="family_diabetes">Family Diabetes</label>
+                        <select id="family_diabetes" name="family_diabetes" required>
+                            <option value="" disabled
+                                {{ 'selected' if not form_data or form_data.family_diabetes is none else '' }}>
+                                Select
+                            </option>
+                            <option value="0"
+                                {{ 'selected' if form_data and form_data.family_diabetes == '0' else '' }}>
+                                0 – No
+                            </option>
+                            <option value="1"
+                                {{ 'selected' if form_data and form_data.family_diabetes == '1' else '' }}>
+                                1 – Yes
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 11. Hypertensive -->
+                    <div class="form-group">
+                        <label for="hypertensive">Hypertensive</label>
+                        <select id="hypertensive" name="hypertensive" required>
+                            <option value="" disabled
+                                {{ 'selected' if not form_data or form_data.hypertensive is none else '' }}>
+                                Select
+                            </option>
+                            <option value="0"
+                                {{ 'selected' if form_data and form_data.hypertensive == '0' else '' }}>
+                                0 – No
+                            </option>
+                            <option value="1"
+                                {{ 'selected' if form_data and form_data.hypertensive == '1' else '' }}>
+                                1 – Yes
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 12. Family Hypertension -->
+                    <div class="form-group">
+                        <label for="family_hypertension">Family Hypertension</label>
+                        <select id="family_hypertension" name="family_hypertension" required>
+                            <option value="" disabled
+                                {{ 'selected' if not form_data or form_data.family_hypertension is none else '' }}>
+                                Select
+                            </option>
+                            <option value="0"
+                                {{ 'selected' if form_data and form_data.family_hypertension == '0' else '' }}>
+                                0 – No
+                            </option>
+                            <option value="1"
+                                {{ 'selected' if form_data and form_data.family_hypertension == '1' else '' }}>
+                                1 – Yes
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 13. Cardiovascular Disease -->
+                    <div class="form-group">
+                        <label for="cardiovascular_disease">Cardiovascular Disease</label>
+                        <select id="cardiovascular_disease" name="cardiovascular_disease" required>
+                            <option value="" disabled
+                                {{ 'selected' if not form_data or form_data.cardiovascular_disease is none else '' }}>
+                                Select
+                            </option>
+                            <option value="0"
+                                {{ 'selected' if form_data and form_data.cardiovascular_disease == '0' else '' }}>
+                                0 – No
+                            </option>
+                            <option value="1"
+                                {{ 'selected' if form_data and form_data.cardiovascular_disease == '1' else '' }}>
+                                1 – Yes
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 14. Stroke -->
+                    <div class="form-group">
+                        <label for="stroke">Stroke</label>
+                        <select id="stroke" name="stroke" required>
+                            <option value="" disabled
+                                {{ 'selected' if not form_data or form_data.stroke is none else '' }}>
+                                Select
+                            </option>
+                            <option value="0"
+                                {{ 'selected' if form_data and form_data.stroke == '0' else '' }}>
+                                0 – No
+                            </option>
+                            <option value="1"
+                                {{ 'selected' if form_data and form_data.stroke == '1' else '' }}>
+                                1 – Yes
+                            </option>
+                        </select>
+                    </div>
+
+                </div><!-- /form-grid -->
+
+                <!-- Form buttons -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">🔍 Predict</button>
+                    <button type="button" class="btn btn-secondary"
+                            onclick="clearForm()">🗑️ Clear Form</button>
+                </div>
+
+            </form>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         MODEL PERFORMANCE SECTION
+         ===================================================== -->
+    <section class="section" id="performance">
+        <div class="container">
+            <h2 class="section-title">Model Performance</h2>
+            <p class="section-description">
+                The table below shows the actual test-set evaluation metrics
+                for the <strong>Balanced Logistic Regression</strong> model
+                used in this system.
+            </p>
+
+            <!-- Performance metrics cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">83.55%</span>
+                    <span class="metric-label">Accuracy</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">24.30%</span>
+                    <span class="metric-label">Precision</span>
+                </div>
+                <div class="metric-card metric-highlight">
+                    <span class="metric-value">75.36%</span>
+                    <span class="metric-label">Recall</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">36.75%</span>
+                    <span class="metric-label">F1-Score</span>
+                </div>
+            </div>
+
+            <!-- Explanation -->
+            <div class="performance-note">
+                <h3>Why is Recall important here?</h3>
+                <p>
+                    In this imbalanced diabetes dataset the positive class
+                    (diabetic patients) is significantly underrepresented.
+                    <strong>Recall</strong> measures how many actual diabetic
+                    cases the model correctly identifies. A high recall
+                    (75.36%) means the model catches most true diabetic
+                    patients, which is critical in a medical screening
+                    context — missing a diabetic case (false negative) can
+                    have far more serious consequences than a false alarm
+                    (false positive).
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         DISCLAIMER
+         ===================================================== -->
+    <section class="section section-alt" id="disclaimer">
+        <div class="container">
+            <div class="disclaimer-box">
+                <h3>⚠️ Disclaimer</h3>
+                <p>
+                    This project is developed for <strong>educational and
+                    academic purposes only</strong>. Predictions are generated
+                    by a machine learning model and must not be considered
+                    medical advice or a clinical diagnosis.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 DiaHealth – Diabetes Prediction System.
+               University ML Lab Project.</p>
+        </div>
+    </footer>
+
+    <!-- =====================================================
+         JAVASCRIPT – Navbar toggle & smooth scroll
+         ===================================================== -->
+    <script>
+        // --- Mobile hamburger menu toggle ---
+        const navToggle = document.getElementById('navToggle');
+        const navLinks  = document.getElementById('navLinks');
+
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            navToggle.classList.toggle('active');
+        });
+
+        // Close menu when a link is clicked (mobile)
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                navToggle.classList.remove('active');
+            });
+        });
+
+        // --- Sticky navbar background on scroll ---
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // --- Clear form helper ---
+        function clearForm() {
+            const form = document.getElementById('predictionForm');
+
+            // Clear all text / number inputs (sets value to blank)
+            form.querySelectorAll('input').forEach(input => {
+                input.value = '';
+            });
+
+            // Reset every dropdown to its first (placeholder) option
+            form.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+
+            // Remove any browser-native validation tooltips
+            form.querySelectorAll(':invalid').forEach(el => {
+                el.setCustomValidity('');
+            });
+
+            // Hide any displayed prediction result or error message
+            document.querySelectorAll('.result-box').forEach(box => {
+                box.style.display = 'none';
+            });
+        }
+
+        // --- Scroll to result if it exists ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const resultBox = document.querySelector('.result-box');
+            if (resultBox) {
+                resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    </script>
+
+</body>
+</html>
